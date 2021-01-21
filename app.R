@@ -86,15 +86,15 @@ ggColorHue <- function(n, l=65) {
 ui <- fluidPage(
     
     # Application title
-    titlePanel("ƒcƒC[ƒg”‚Ì„ˆÚ"),
+    titlePanel("ãƒ„ã‚¤ãƒ¼ãƒˆæ•°ã®æ¨ç§»"),
     
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
             textInput("wd",
-                      "’Šo‚·‚é’PŒê",
-                      "‰J"),
-            actionButton("button1","’ŠoŠJn")
+                      "æŠ½å‡ºã™ã‚‹å˜èª",
+                      "é›¨"),
+            actionButton("button1","æŠ½å‡ºé–‹å§‹")
             # submitButton()
         ),
         
@@ -119,8 +119,8 @@ server <- function(input, output) {
     
     TDC <- data.frame()
     dc=""
-    wd="ƒRƒƒi"
-    wd="‰J"
+    wd="ã‚³ãƒ­ãƒŠ"
+    wd="é›¨"
     
     WD <- eventReactive(input$button1,{
         input$wd
@@ -241,7 +241,7 @@ server <- function(input, output) {
             
             rownames(TDCS) <- unique(Comp$JTime)
             
-            dygraph(TDCS,main = paste0(max(TDC$JTime)-3*60*60,"`",max(TDC$JTime))) %>%
+            dygraph(TDCS,main = paste0(max(TDC$JTime)-3*60*60,"ï½",max(TDC$JTime))) %>%
                 dyOptions(stackedGraph = T, drawPoints = T, pointSize = 1, strokeWidth = 2,fillAlpha = 0.5,colors = c("red","blue"),
                           axisLabelFontSize = 30,axisLabelWidth = 100,titleHeight = 50,labelsKMB = T) %>%
                 dyRangeSelector(height = 100,keepMouseZoom = T,dateWindow = c(max(TDC$JTime)-3*60*60,max(TDC$JTime))) %>%
@@ -293,7 +293,7 @@ server <- function(input, output) {
             
             
             TF0 <- docDF(TDS, col = 100, type = 1, N = 1, minFreq = 1, nDF = 1, dic = "Tweet_data/user.dic",
-                         pos = c("Š´“®Œ","Œ`—eŒ","“®Œ","•›Œ","–¼Œ","Ú“ªŒ","˜A‘ÌŒ"))
+                         pos = c("æ„Ÿå‹•è©","å½¢å®¹è©","å‹•è©","å‰¯è©","åè©","æ¥é ­è©","é€£ä½“è©"))
             
             # TF <- docDF(TDS[46,], col = 100, type = 1, N = 10, minFreq = 1, nDF = 1, dic = "Tweet_data/user.dic")
             
@@ -309,7 +309,7 @@ server <- function(input, output) {
                 filter(!CF)
             
             TF1 <- docDF(TDS, col = 100, type = 1, N = 3, minFreq = 1, nDF = 1, dic = "Tweet_data/user.dic",
-                         pos = c("Š´“®Œ","Œ`—eŒ","“®Œ","•›Œ","–¼Œ","Ú“ªŒ","˜A‘ÌŒ"))
+                         pos = c("æ„Ÿå‹•è©","å½¢å®¹è©","å‹•è©","å‰¯è©","åè©","æ¥é ­è©","é€£ä½“è©"))
             
             TF1S <-
                 TF1 %>%
@@ -318,16 +318,16 @@ server <- function(input, output) {
                 mutate_at(vars(N1,N2,N3),funs(ifelse(. %in% TF0S2$N1,"",.))) %>%
                 filter(N1!="") %>%
                 left_join(tds %>% select(Tweet,one_of(colnames(tds)))) %>%
-                mutate(word=ifelse(grepl("^Ú“ªŒ-",POS1) & !grepl("<U",N2),paste0(N1,N2),N1)) %>%
-                mutate(word=ifelse(grepl("^[[:alnum:]*]+-Ú”ö-",POS2) & 
-                                       !grepl("^‹L†-Ú”ö-",POS2) & nchar(N2)<3,paste0(N1,N2),word)) %>%
-                mutate(word=ifelse(grepl("^Ú“ªŒ-",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-Ú”ö",POS2) &@
-                                       !grepl("^[[:alnum:]*]+-‹L†-Ú”ö",POS2) & nchar(N3)<3,paste0(N1,N2,N3),word)) %>%
-                mutate(word=ifelse(grepl("^[[:alnum:]*]+-Ú”ö-Ú”ö",POS2) & 
-                                       !grepl("^‹L†-Ú”ö-Ú”ö",POS2),paste0(N1,N2,N3),word)) %>%
-                mutate(word=ifelse(grepl("^”-”-Ú”ö",POS2) & nchar(N3)<3,paste0(N1,N2,N3),word)) %>%
-                mutate(word=ifelse(grepl("^”-”-”",POS2),paste0(N1,N2,N3),word)) %>%
-                mutate(word=ifelse(grepl("^”-‹L†-”",POS2),paste0(N1,N2,N3),word)) %>%
+                mutate(word=ifelse(grepl("^æ¥é ­è©-",POS1) & !grepl("<U",N2),paste0(N1,N2),N1)) %>%
+                mutate(word=ifelse(grepl("^[[:alnum:]*]+-æ¥å°¾-",POS2) & 
+                                       !grepl("^è¨˜å·-æ¥å°¾-",POS2) & nchar(N2)<3,paste0(N1,N2),word)) %>%
+                mutate(word=ifelse(grepl("^æ¥é ­è©-",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-æ¥å°¾",POS2) &ã€€
+                                       !grepl("^[[:alnum:]*]+-è¨˜å·-æ¥å°¾",POS2) & nchar(N3)<3,paste0(N1,N2,N3),word)) %>%
+                mutate(word=ifelse(grepl("^[[:alnum:]*]+-æ¥å°¾-æ¥å°¾",POS2) & 
+                                       !grepl("^è¨˜å·-æ¥å°¾-æ¥å°¾",POS2),paste0(N1,N2,N3),word)) %>%
+                mutate(word=ifelse(grepl("^æ•°-æ•°-æ¥å°¾",POS2) & nchar(N3)<3,paste0(N1,N2,N3),word)) %>%
+                mutate(word=ifelse(grepl("^æ•°-æ•°-æ•°",POS2),paste0(N1,N2,N3),word)) %>%
+                mutate(word=ifelse(grepl("^æ•°-è¨˜å·-æ•°",POS2),paste0(N1,N2,N3),word)) %>%
                 select(N1,N2,N3,POS1,POS2,word,one_of(colnames(.)))
             
             TF1S2 <-
@@ -342,7 +342,7 @@ server <- function(input, output) {
                 arrange(Rank)
             
             TF2 <- docDF(TDS, col = 100, type = 1, N = 6, minFreq = 1, nDF = 1, dic = "Tweet_data/user.dic",
-                         pos = c("Š´“®Œ","Œ`—eŒ","“®Œ","•›Œ","–¼Œ","Ú“ªŒ","˜A‘ÌŒ"))
+                         pos = c("æ„Ÿå‹•è©","å½¢å®¹è©","å‹•è©","å‰¯è©","åè©","æ¥é ­è©","é€£ä½“è©"))
             TF2S <-
                 TF2 %>%
                 gather(ID,n,starts_with("Row")) %>%
@@ -353,51 +353,51 @@ server <- function(input, output) {
                 summarise(ID=min(ID),n=sum(n)) %>%
                 ungroup() %>%
                 left_join(TDS %>% select(Tweet,one_of(colnames(tds)))) %>%
-                mutate(word1=ifelse(grepl("^Ú“ªŒ-[:alnum:]*-",POS1) & !grepl("<U",N2),paste0(N1,N2),N1)) %>%
-                mutate(word1=ifelse(grepl("^[[:alnum:]*]+-Ú”ö-",POS2) & 
-                                        !grepl("^‹L†-Ú”ö-",POS2) & nchar(N2)<3,paste0(N1,N2),word1)) %>%
-                mutate(word1=ifelse(grepl("^Ú“ªŒ-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-Ú”ö",POS2) & 
-                                        !grepl("^[[:alnum:]*]+-‹L†-Ú”ö",POS2) & nchar(N3)<3,paste0(N1,N2,N3),word1)) %>%
-                mutate(word1=ifelse(grepl("^[[:alnum:]*]+-Ú”ö-Ú”ö",POS2) & 
-                                        !grepl("^‹L†-Ú”ö-Ú”ö",POS2),paste0(N1,N2,N3),word1)) %>%
-                mutate(word1=ifelse(grepl("^”-”-Ú”ö",POS2) & nchar(N3)<3,paste0(N1,N2,N3),word1)) %>%
-                mutate(word1=ifelse(grepl("^”-”-”",POS2),paste0(N1,N2,N3),word1)) %>%
-                mutate(word1=ifelse(grepl("^”-‹L†-”",POS2),paste0(N1,N2,N3),word1)) %>%
-                # mutate(word1=ifelse(grepl("^[:alnum:]*-[:alnum:]*-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^”-‹L†-”-‹L†-”",POS2),paste0(N1,N2,N3,N4,N5),word1)) %>%
-                # mutate(word1=ifelse(grepl("^[:alnum:]*-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^”-”-”-”",POS2),paste0(N1,N2,N3,N4),word1)) %>%
+                mutate(word1=ifelse(grepl("^æ¥é ­è©-[:alnum:]*-",POS1) & !grepl("<U",N2),paste0(N1,N2),N1)) %>%
+                mutate(word1=ifelse(grepl("^[[:alnum:]*]+-æ¥å°¾-",POS2) & 
+                                        !grepl("^è¨˜å·-æ¥å°¾-",POS2) & nchar(N2)<3,paste0(N1,N2),word1)) %>%
+                mutate(word1=ifelse(grepl("^æ¥é ­è©-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-æ¥å°¾",POS2) & 
+                                        !grepl("^[[:alnum:]*]+-è¨˜å·-æ¥å°¾",POS2) & nchar(N3)<3,paste0(N1,N2,N3),word1)) %>%
+                mutate(word1=ifelse(grepl("^[[:alnum:]*]+-æ¥å°¾-æ¥å°¾",POS2) & 
+                                        !grepl("^è¨˜å·-æ¥å°¾-æ¥å°¾",POS2),paste0(N1,N2,N3),word1)) %>%
+                mutate(word1=ifelse(grepl("^æ•°-æ•°-æ¥å°¾",POS2) & nchar(N3)<3,paste0(N1,N2,N3),word1)) %>%
+                mutate(word1=ifelse(grepl("^æ•°-æ•°-æ•°",POS2),paste0(N1,N2,N3),word1)) %>%
+                mutate(word1=ifelse(grepl("^æ•°-è¨˜å·-æ•°",POS2),paste0(N1,N2,N3),word1)) %>%
+                # mutate(word1=ifelse(grepl("^[:alnum:]*-[:alnum:]*-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^æ•°-è¨˜å·-æ•°-è¨˜å·-æ•°",POS2),paste0(N1,N2,N3,N4,N5),word1)) %>%
+                # mutate(word1=ifelse(grepl("^[:alnum:]*-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^æ•°-æ•°-æ•°-æ•°",POS2),paste0(N1,N2,N3,N4),word1)) %>%
                 
-                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-Ú“ªŒ-[:alnum:]*-",POS1) & !grepl("<U",N3),paste0(N2,N3),N2)) %>%
-                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-Ú”ö-",POS2) & 
-                                        !grepl("^[[:alnum:]*]+-‹L†-Ú”ö-",POS2) & nchar(N3)<3,paste0(N2,N3),word2)) %>%
-                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-Ú“ªŒ-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-Ú”ö",POS2) & 
-                                        !grepl("^[[:alnum:]*]+-[[:alnum:]*]+-‹L†-Ú”ö",POS2) & nchar(N4)<3,paste0(N2,N3,N4),word2)) %>%
-                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-Ú”ö-Ú”ö",POS2) & 
-                                        !grepl("^[[:alnum:]*]+-‹L†-Ú”ö-Ú”ö",POS2),paste0(N2,N3,N4),word2)) %>%
-                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-”-”-Ú”ö",POS2) & nchar(N4)<3,paste0(N2,N3,N4),word2)) %>%
-                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-”-”-”",POS2),paste0(N2,N3,N4),word2)) %>%
-                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-”-‹L†-”",POS2),paste0(N2,N3,N4),word2)) %>%
+                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-æ¥é ­è©-[:alnum:]*-",POS1) & !grepl("<U",N3),paste0(N2,N3),N2)) %>%
+                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-æ¥å°¾-",POS2) & 
+                                        !grepl("^[[:alnum:]*]+-è¨˜å·-æ¥å°¾-",POS2) & nchar(N3)<3,paste0(N2,N3),word2)) %>%
+                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-æ¥é ­è©-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-æ¥å°¾",POS2) & 
+                                        !grepl("^[[:alnum:]*]+-[[:alnum:]*]+-è¨˜å·-æ¥å°¾",POS2) & nchar(N4)<3,paste0(N2,N3,N4),word2)) %>%
+                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-æ¥å°¾-æ¥å°¾",POS2) & 
+                                        !grepl("^[[:alnum:]*]+-è¨˜å·-æ¥å°¾-æ¥å°¾",POS2),paste0(N2,N3,N4),word2)) %>%
+                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-æ•°-æ•°-æ¥å°¾",POS2) & nchar(N4)<3,paste0(N2,N3,N4),word2)) %>%
+                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-æ•°-æ•°-æ•°",POS2),paste0(N2,N3,N4),word2)) %>%
+                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-æ•°-è¨˜å·-æ•°",POS2),paste0(N2,N3,N4),word2)) %>%
                 
-                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-Ú“ªŒ-[:alnum:]*-",POS1) & !grepl("<U",N4),paste0(N3,N4),N3)) %>%
-                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-Ú”ö-",POS2) & 
-                                        !grepl("^[[:alnum:]*]+-[[:alnum:]*]+-‹L†-Ú”ö-",POS2) & nchar(N4)<3,paste0(N3,N4),word3)) %>%
-                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-Ú“ªŒ-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-Ú”ö",POS2) & 
-                                        !grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+‹L†-Ú”ö",POS2) & nchar(N5)<3,paste0(N3,N4,N5),word3)) %>%
-                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-Ú”ö-Ú”ö",POS2) & 
-                                        !grepl("^[[:alnum:]*]+-[[:alnum:]*]+-‹L†-Ú”ö-Ú”ö",POS2),paste0(N3,N4,N5),word3)) %>%
-                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-”-”-Ú”ö",POS2) & nchar(N5)<3,paste0(N3,N4,N5),word3)) %>%
-                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-”-”-”",POS2),paste0(N3,N4,N5),word3)) %>%
-                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-”-‹L†-”",POS2),paste0(N3,N4,N5),word3)) %>%
+                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-æ¥é ­è©-[:alnum:]*-",POS1) & !grepl("<U",N4),paste0(N3,N4),N3)) %>%
+                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-æ¥å°¾-",POS2) & 
+                                        !grepl("^[[:alnum:]*]+-[[:alnum:]*]+-è¨˜å·-æ¥å°¾-",POS2) & nchar(N4)<3,paste0(N3,N4),word3)) %>%
+                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-æ¥é ­è©-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-æ¥å°¾",POS2) & 
+                                        !grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+è¨˜å·-æ¥å°¾",POS2) & nchar(N5)<3,paste0(N3,N4,N5),word3)) %>%
+                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-æ¥å°¾-æ¥å°¾",POS2) & 
+                                        !grepl("^[[:alnum:]*]+-[[:alnum:]*]+-è¨˜å·-æ¥å°¾-æ¥å°¾",POS2),paste0(N3,N4,N5),word3)) %>%
+                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-æ•°-æ•°-æ¥å°¾",POS2) & nchar(N5)<3,paste0(N3,N4,N5),word3)) %>%
+                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-æ•°-æ•°-æ•°",POS2),paste0(N3,N4,N5),word3)) %>%
+                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-æ•°-è¨˜å·-æ•°",POS2),paste0(N3,N4,N5),word3)) %>%
                 
-                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-Ú“ªŒ-[:alnum:]*-",POS1) & !grepl("<U",N5),paste0(N4,N5),N4)) %>%
-                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-Ú”ö-",POS2) & 
-                                        !grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-‹L†-Ú”ö-",POS2) & nchar(N5)<3,paste0(N4,N5),word4)) %>%
-                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-Ú“ªŒ-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-Ú”ö",POS2) & 
-                                        !grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-‹L†-Ú”ö",POS2) & nchar(N6)<3,paste0(N4,N5,N6),word4)) %>%
-                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-Ú”ö-Ú”ö",POS2) & 
-                                        !grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-‹L†-Ú”ö-Ú”ö",POS2),paste0(N4,N5,N6),word4)) %>%
-                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-”-”-Ú”ö",POS2) & nchar(N6)<3,paste0(N4,N5,N6),word4)) %>%
-                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-”-”-”",POS2),paste0(N4,N5,N6),word4)) %>%
-                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-”-‹L†-”",POS2),paste0(N4,N5,N6),word4)) %>%
+                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-æ¥é ­è©-[:alnum:]*-",POS1) & !grepl("<U",N5),paste0(N4,N5),N4)) %>%
+                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-æ¥å°¾-",POS2) & 
+                                        !grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-è¨˜å·-æ¥å°¾-",POS2) & nchar(N5)<3,paste0(N4,N5),word4)) %>%
+                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-æ¥é ­è©-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-æ¥å°¾",POS2) & 
+                                        !grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-è¨˜å·-æ¥å°¾",POS2) & nchar(N6)<3,paste0(N4,N5,N6),word4)) %>%
+                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-æ¥å°¾-æ¥å°¾",POS2) & 
+                                        !grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-è¨˜å·-æ¥å°¾-æ¥å°¾",POS2),paste0(N4,N5,N6),word4)) %>%
+                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-æ•°-æ•°-æ¥å°¾",POS2) & nchar(N6)<3,paste0(N4,N5,N6),word4)) %>%
+                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-æ•°-æ•°-æ•°",POS2),paste0(N4,N5,N6),word4)) %>%
+                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-æ•°-è¨˜å·-æ•°",POS2),paste0(N4,N5,N6),word4)) %>%
                 group_by(N1,N2,N3,N4,N5,N6,status_id) %>%
                 mutate(word2=ifelse(!grepl(word2,word1),word2,ifelse(!grepl(word3,word1),word3,word4))) %>%
                 ungroup() %>%
@@ -548,11 +548,11 @@ server <- function(input, output) {
                                arrow = arrow(length = unit(3,'mm')), end_cap = circle(5,'mm'),force_flip = F) +
                 geom_node_point(aes(col = Cluster, size = Freq)) +
                 geom_node_text(aes(label = name), repel = F, size=7.5) +
-                ggtitle(paste0("",min(TFS3$JTime),"~",max(TFS3$JTime),"\n",nrow(TFS00),"ƒ‹[ƒ‹")) + #,k,"ƒcƒC[ƒg@"
+                ggtitle(paste0("",min(TFS3$JTime),"~",max(TFS3$JTime),"\n",nrow(TFS00),"ãƒ«ãƒ¼ãƒ«")) + #,k,"ãƒ„ã‚¤ãƒ¼ãƒˆã€€"
                 theme_graph(title_size = 30) +
                 scale_edge_alpha(range = c(0,1)) +
                 scale_size_continuous(range = c(5,30),breaks = c(min(br),max(br))) + #,breaks = seq(0,floor(mn/keta)*keta,by = keta)
-                theme( legend.text =  element_text(size = 20), # –}—á
+                theme( legend.text =  element_text(size = 20), # å‡¡ä¾‹
                        legend.title = element_text(face = "bold", size = 20, hjust = 0)) +
                 guides(alpha = guide_legend(title = "LEFT", title.position = "left")) +
                 guides(colour = guide_legend(order=1 , override.aes = list(size=10)),
@@ -596,14 +596,14 @@ server <- function(input, output) {
             p <-
                 TDC2 %>%
                 # filter(total>0) %>%
-                mutate(RTs=factor(RT,labels = c("ƒIƒŠƒWƒiƒ‹ƒcƒC[ƒg","ƒŠƒcƒC[ƒg"))) %>%
+                mutate(RTs=factor(RT,labels = c("ã‚ªãƒªã‚¸ãƒŠãƒ«ãƒ„ã‚¤ãƒ¼ãƒˆ","ãƒªãƒ„ã‚¤ãƒ¼ãƒˆ"))) %>%
                 ggplot(aes(x=JTime,y=n,fill=reorder(RTs,-RT))) +
                 geom_area(col="black") +
                 # geom_text(data=TDC2,aes(y=total+10,label=format(JTime,"%H"),fill=NULL),col="red") +
                 labs(x="",y="",fill="") +
-                scale_x_datetime(date_breaks="1 hours",date_labels = "%H") +
+                scale_x_datetime(date_breaks="1 hours",date_labels = "%Hæ™‚") +
                 scale_y_continuous(breaks = seq(0,10000000,10^keta),limits = c(0,max(TDC2$total)+10^(keta-1))) +
-                ggtitle(paste0(min(TDC2$JTime),"`",max(TDC2$JTime))) +
+                ggtitle(paste0(min(TDC2$JTime),"ï½",max(TDC2$JTime))) +
                 theme(legend.position = "bottom") +
                 theme(text = element_text(size=30)) +
                 theme(axis.title.x = element_blank())
@@ -640,15 +640,15 @@ server <- function(input, output) {
             p <-
                 TDC2 %>%
                 # filter(total>0) %>%
-                mutate(RTs=factor(RT,labels = c("ƒIƒŠƒWƒiƒ‹ƒcƒC[ƒg","ƒŠƒcƒC[ƒg"))) %>%
+                mutate(RTs=factor(RT,labels = c("ã‚ªãƒªã‚¸ãƒŠãƒ«ãƒ„ã‚¤ãƒ¼ãƒˆ","ãƒªãƒ„ã‚¤ãƒ¼ãƒˆ"))) %>%
                 ggplot(aes(x=JTime,y=n,fill=reorder(RTs,-RT))) +
                 geom_area(col="black") +
                 # geom_text(data=TDC2,aes(y=total+10,label=format(JTime,"%H"),fill=NULL),col="red") +
                 labs(x="",y="",fill="") +
-                scale_x_datetime(date_breaks="1 hours",date_labels = "%H",
+                scale_x_datetime(date_breaks="1 hours",date_labels = "%Hæ™‚",
                                  date_minor_break="1 hours") +
                 scale_y_continuous(breaks = seq(0,10000000,10^keta),limits = c(0,max(TDC2$total)+10^(keta-1))) +
-                ggtitle(paste0(min(TDC2$JTime),"`",max(TDC2$JTime))) +
+                ggtitle(paste0(min(TDC2$JTime),"ï½",max(TDC2$JTime))) +
                 theme(legend.position = "bottom") +
                 theme(text = element_text(size=30)) +
                 # theme(axis.text.x =  element_text(size=30)) +
@@ -687,14 +687,14 @@ server <- function(input, output) {
             p <-
                 TDC2 %>%
                 # filter(total>0) %>%
-                mutate(RTs=factor(RT,labels = c("ƒIƒŠƒWƒiƒ‹ƒcƒC[ƒg","ƒŠƒcƒC[ƒg"))) %>%
+                mutate(RTs=factor(RT,labels = c("ã‚ªãƒªã‚¸ãƒŠãƒ«ãƒ„ã‚¤ãƒ¼ãƒˆ","ãƒªãƒ„ã‚¤ãƒ¼ãƒˆ"))) %>%
                 ggplot(aes(x=JTime,y=n,fill=reorder(RTs,-RT))) +
                 geom_area(col="black") +
                 # geom_text(data=TDC2,aes(y=total+10,label=format(JTime,"%H"),fill=NULL),col="red") +
                 labs(x="",y="",fill="") +
-                scale_x_datetime(date_breaks="1 days",date_labels = "%d“ú") +
+                scale_x_datetime(date_breaks="1 days",date_labels = "%dæ—¥") +
                 scale_y_continuous(breaks = seq(0,10000000,10^keta),limits = c(0,max(TDC2$total)+10^(keta-1))) +
-                ggtitle(paste0(min(TDC2$JTime),"`",max(TDC2$JTime))) +
+                ggtitle(paste0(min(TDC2$JTime),"ï½",max(TDC2$JTime))) +
                 theme(legend.position = "bottom") +
                 theme(text = element_text(size=30)) +
                 theme(axis.title.x = element_blank())
