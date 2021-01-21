@@ -100,10 +100,10 @@ ui <- fluidPage(
         
         # Show a plot of the generated distribution
         mainPanel(
-            dygraphOutput("Hdy"),
-            plotOutput("ggraph"),
-            # plotOutput("Hline"),
-            plotOutput("Dline0"),
+            column(6,dygraphOutput("Hdy"),
+                   plotOutput("Dline0")),
+            column(6,plotOutput("ggraph",height = "800px")),
+            # column(6,plotOutput("Hline")),
             # plotOutput("Dline"),
             # plotOutput("Mline"),
             width = 12
@@ -349,7 +349,10 @@ server <- function(input, output) {
                 filter(n>0) %>%
                 mutate_at(vars(N1,N2,N3,N4,N5,N6),funs(ifelse(. %in% TF0S2$N1,"",.))) %>%
                 filter(N1!="") %>%
-                left_join(tds %>% select(Tweet,one_of(colnames(tds)))) %>%
+                group_by(N1,N2,N3,N4,N5,N6,POS1,POS2) %>%
+                summarise(ID=min(ID),n=sum(n)) %>%
+                ungroup() %>%
+                left_join(TDS %>% select(Tweet,one_of(colnames(tds)))) %>%
                 mutate(word1=ifelse(grepl("^Ú“ªŒ-[:alnum:]*-",POS1) & !grepl("<U",N2),paste0(N1,N2),N1)) %>%
                 mutate(word1=ifelse(grepl("^[[:alnum:]*]+-Ú”ö-",POS2) & 
                                         !grepl("^‹L†-Ú”ö-",POS2) & nchar(N2)<3,paste0(N1,N2),word1)) %>%
@@ -395,7 +398,7 @@ server <- function(input, output) {
                 mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-”-”-Ú”ö",POS2) & nchar(N6)<3,paste0(N4,N5,N6),word4)) %>%
                 mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-”-”-”",POS2),paste0(N4,N5,N6),word4)) %>%
                 mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-”-‹L†-”",POS2),paste0(N4,N5,N6),word4)) %>%
-                group_by(N1,N2,N3,N4,N5,N6) %>%
+                group_by(N1,N2,N3,N4,N5,N6,status_id) %>%
                 mutate(word2=ifelse(!grepl(word2,word1),word2,ifelse(!grepl(word3,word1),word3,word4))) %>%
                 ungroup() %>%
                 mutate(word1=ifelse(grepl("20../",word1),substring(word1,1,4),word1)) %>%
@@ -404,7 +407,10 @@ server <- function(input, output) {
             
             TF2S2 <-
                 TF2S %>%
-                filter(word1!="U") %>%
+                # filter(word1!="U") %>%
+                # filter(word2!="U") %>%
+                # filter(!(word1 %in% LETTERS & grepl("[[:digit:]]",word2))) %>%
+                # filter(!(word2 %in% LETTERS & grepl("[[:digit:]]",word1))) %>%
                 group_by(word1,word2) %>% #,POS1,POS2
                 summarise(freq=sum(n)) %>%
                 ungroup() %>%
@@ -415,12 +421,23 @@ server <- function(input, output) {
                 arrange(Ranks) %>%
                 mutate(word=paste0(word1,word2)) %>%
                 ungroup() %>%
-                filter(freq>1) %>%
-                filter(!word1 %in% c("https","t","co")) %>%
-                filter(!word2 %in% c("https","t","co"))
+                filter(freq>1)
+            
+            TF2S3 <- TF2S2
+            for (n in 1:max(nchar(TF2S2$word))) {
+                TF2S3 <-
+                    TF2S3 %>%
+                    mutate(w=substring(word,n+1,nchar(word)))
+                
+                TF2S3 <-
+                    TF2S3 %>%
+                    # mutate(word %in% TF2S3$w) %>%
+                    filter(!word %in% TF2S3$w)
+                print(n)
+            }
             
             TF2S4 <-
-                TF2S2 %>%
+                TF2S3 %>%
                 mutate(rate=freq/sum(freq)) %>%
                 filter(word1!=word2) %>%
                 filter(word1!="RT") %>%
