@@ -101,7 +101,8 @@ ui <- fluidPage(
         # Show a plot of the generated distribution
         mainPanel(
             column(6,dygraphOutput("Hdy"),
-                   plotOutput("Dline0")),
+                   dygraphOutput("Ddy")),
+                   # plotOutput("Dline0")),
             column(6,plotOutput("ggraph",height = "800px")),
             # column(6,plotOutput("Hline")),
             # plotOutput("Dline"),
@@ -245,6 +246,61 @@ server <- function(input, output) {
                 dyOptions(stackedGraph = T, drawPoints = T, pointSize = 1, strokeWidth = 2,fillAlpha = 0.5,colors = c("red","blue"),
                           axisLabelFontSize = 30,axisLabelWidth = 100,titleHeight = 50,labelsKMB = T) %>%
                 dyRangeSelector(height = 100,keepMouseZoom = T,dateWindow = c(max(TDC$JTime)-3*60*60,max(TDC$JTime))) %>%
+                # dyHighlight(highlightCircleSize = 3,
+                #             highlightSeriesBackgroundAlpha = 0.5,
+                #             highlightSeriesOpts=list(),
+                #             hideOnMouseOut = T) %>%
+                # dyLegend(show = "always",
+                #          width = 100,
+                #          showZeroValues = TRUE, labelsDiv = NULL,
+                #          labelsSeparateLines = T, hideOnMouseOut = TRUE) 
+                dyLegend(width = 175)
+            
+        })
+        
+        output$Ddy <- renderDygraph({
+            TDCH <-
+                TDC %>%
+                mutate(M=floor(Minute/10)*10) %>%
+                group_by(Year,Month,Day,Hour,M,RT) %>%
+                summarise(n=sum(n)) %>%
+                ungroup() %>%
+                complete(Year,Month,Day,Hour,M,RT,fill=list(n=0)) %>%
+                group_by(Year,Month,Day,Hour,M) %>%
+                mutate(total=sum(n)) %>%
+                ungroup() %>%
+                mutate(JTime=as.POSIXct(paste(Year,Month,Day,Hour,M),format="%Y %m %d %H %M")) %>%
+                filter(JTime<Sys.time())
+            
+            Comp <- 
+                data.frame(JTime=rep(seq(max(TDCH$JTime)-24*60*60,max(TDCH$JTime),60*10),each=2),
+                           RT=rep(c(F,T),24*6+1))
+            TDC2 <-
+                Comp %>%
+                left_join(TDCH) %>%
+                mutate(n=ifelse(is.na(n),0,n)) %>%
+                mutate(total=ifelse(is.na(total),0,total))
+            
+            TDCS <-
+                Comp %>%
+                left_join(TDC2) %>%
+                complete(JTime,RT,fill=list(n=0)) %>%
+                mutate(RTs=factor(RT,labels = c("Origin","Retweet"))) %>%
+                select(JTime,RTs,n) %>%
+                spread(RTs,n) %>%
+                select(Retweet,Origin)
+            
+            # TDCS <-
+            #     TDC %>%
+            #     filter(!RT) %>%
+            #     select(Origin=n,Total=total)
+            
+            rownames(TDCS) <- unique(Comp$JTime)
+            
+            dygraph(TDCS,main = paste0(max(TDC$JTime)-24*60*60,"～",max(TDC$JTime))) %>%
+                dyOptions(stackedGraph = T, drawPoints = T, pointSize = 1, strokeWidth = 2,fillAlpha = 0.5,colors = c("red","blue"),
+                          axisLabelFontSize = 30,axisLabelWidth = 100,titleHeight = 50,labelsKMB = T) %>%
+                dyRangeSelector(height = 100,keepMouseZoom = T,dateWindow = c(max(TDC$JTime)-24*60*60,max(TDC$JTime))) %>%
                 # dyHighlight(highlightCircleSize = 3,
                 #             highlightSeriesBackgroundAlpha = 0.5,
                 #             highlightSeriesOpts=list(),
