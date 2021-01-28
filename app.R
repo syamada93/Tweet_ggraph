@@ -100,8 +100,8 @@ ui <- fluidPage(
         
         # Show a plot of the generated distribution
         mainPanel(
-            column(6,dygraphOutput("Hdy"),
-                   dygraphOutput("Ddy")),
+            column(6,dygraphOutput("Mdy"),
+                   dygraphOutput("Hdy")),
                    # plotOutput("Dline0")),
             column(6,plotOutput("ggraph",height = "800px")),
             # column(6,plotOutput("Hline")),
@@ -122,6 +122,9 @@ server <- function(input, output) {
     dc=""
     wd="コロナ"
     wd="雨"
+    wd="雨 コロナ"
+    wd="大雨"
+    wd="神奈川　コロナ"
     
     WD <- eventReactive(input$button1,{
         input$wd
@@ -154,7 +157,8 @@ server <- function(input, output) {
         tds <-
             td %>%
             mutate(JTime=as.POSIXct(format(created_at, tz="Japan"))) %>%
-            mutate(Tweet=stri_trans_nfkc(text)) %>%
+            mutate(Tweet=gsub("　","",text)) %>%
+            mutate(Tweet=stri_trans_nfkc(Tweet)) %>%
             # mutate(Tweet=gsub("\"","",Tweet)) %>%
             mutate(Tweet=gsub("http[[:print:]]{,18}","",Tweet)) %>%
             mutate(Tweet=gsub("@[[:alnum:][:punct:]]+","",Tweet)) %>%
@@ -181,6 +185,10 @@ server <- function(input, output) {
         print(paste(min(tds$JTime),max(tds$JTime),nrow(tds)))
         
         write_as_csv(tds,paste0("Tweet_data/Tweet_",wd,"_",day,"_",mid,".csv"),fileEncoding = "CP932")
+        
+        # te <-
+        #     tds%>%
+        #     distinct(status_id,text,Tweet)
         
         # print(length(dc))
         # print(nrow(tds %>% filter(!status_id %in% dc)))
@@ -220,7 +228,7 @@ server <- function(input, output) {
         
         # print(list.files("Tweet_data"))
         
-        output$Hdy <- renderDygraph({
+        output$Mdy <- renderDygraph({
             Comp <- 
                 # data.frame(JTime=(max(TDC$JTime)-60*60):(max(TDC$JTime))) %>%
                 data.frame(JTime=rep(seq(min(TDC$JTime),max(TDC$JTime),60),each=2),
@@ -258,7 +266,7 @@ server <- function(input, output) {
             
         })
         
-        output$Ddy <- renderDygraph({
+        output$Hdy <- renderDygraph({
             TDCH <-
                 TDC %>%
                 mutate(M=floor(Minute/10)*10) %>%
@@ -273,8 +281,8 @@ server <- function(input, output) {
                 filter(JTime<Sys.time())
             
             Comp <- 
-                data.frame(JTime=rep(seq(max(TDCH$JTime)-24*60*60,max(TDCH$JTime),60*10),each=2),
-                           RT=rep(c(F,T),24*6+1))
+                data.frame(JTime=rep(seq(min(TDCH$JTime),max(TDCH$JTime),60*10),each=2),
+                           RT=rep(c(F,T)))
             TDC2 <-
                 Comp %>%
                 left_join(TDCH) %>%
@@ -409,51 +417,53 @@ server <- function(input, output) {
                 summarise(ID=min(ID),n=sum(n)) %>%
                 ungroup() %>%
                 left_join(TDS %>% select(Tweet,one_of(colnames(tds)))) %>%
-                mutate(word1=ifelse(grepl("^接頭詞-[:alnum:]*-",POS1) & !grepl("<U",N2),paste0(N1,N2),N1)) %>%
+                # filter(status_id=="x1354629424977592322") %>%
+                mutate(word1=ifelse(grepl("^接頭詞-[[:alnum:]*]+-",POS1) & !grepl("<U",N2),paste0(N1,N2),N1)) %>%
                 mutate(word1=ifelse(grepl("^[[:alnum:]*]+-接尾-",POS2) & 
                                         !grepl("^記号-接尾-",POS2) & nchar(N2)<3,paste0(N1,N2),word1)) %>%
-                mutate(word1=ifelse(grepl("^接頭詞-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-接尾",POS2) & 
+                mutate(word1=ifelse(grepl("^接頭詞-[[:alnum:]*]+-[[:alnum:]*]+",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-接尾",POS2) & 
                                         !grepl("^[[:alnum:]*]+-記号-接尾",POS2) & nchar(N3)<3,paste0(N1,N2,N3),word1)) %>%
                 mutate(word1=ifelse(grepl("^[[:alnum:]*]+-接尾-接尾",POS2) & 
                                         !grepl("^記号-接尾-接尾",POS2),paste0(N1,N2,N3),word1)) %>%
                 mutate(word1=ifelse(grepl("^数-数-接尾",POS2) & nchar(N3)<3,paste0(N1,N2,N3),word1)) %>%
                 mutate(word1=ifelse(grepl("^数-数-数",POS2),paste0(N1,N2,N3),word1)) %>%
                 mutate(word1=ifelse(grepl("^数-記号-数",POS2),paste0(N1,N2,N3),word1)) %>%
-                # mutate(word1=ifelse(grepl("^[:alnum:]*-[:alnum:]*-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^数-記号-数-記号-数",POS2),paste0(N1,N2,N3,N4,N5),word1)) %>%
-                # mutate(word1=ifelse(grepl("^[:alnum:]*-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^数-数-数-数",POS2),paste0(N1,N2,N3,N4),word1)) %>%
+                # mutate(word1=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+",POS1) & grepl("^数-記号-数-記号-数",POS2),paste0(N1,N2,N3,N4,N5),word1)) %>%
+                # mutate(word1=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+",POS1) & grepl("^数-数-数-数",POS2),paste0(N1,N2,N3,N4),word1)) %>%
                 
-                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-接頭詞-[:alnum:]*-",POS1) & !grepl("<U",N3),paste0(N2,N3),N2)) %>%
-                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-接尾-",POS2) & 
+                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-接頭詞-[[:alnum:]*]+-",POS1) & !grepl("<U",N3),paste0(N2,N3),N2)) %>%
+                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-接尾-",POS2) & 
                                         !grepl("^[[:alnum:]*]+-記号-接尾-",POS2) & nchar(N3)<3,paste0(N2,N3),word2)) %>%
-                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-接頭詞-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-接尾",POS2) & 
+                # select(N1,N2,N3,N4,N5,N6,word1,word2,POS1,POS2,one_of(colnames(.)))
+                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-接頭詞-[[:alnum:]*]+-[[:alnum:]*]+",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-接尾",POS2) & 
                                         !grepl("^[[:alnum:]*]+-[[:alnum:]*]+-記号-接尾",POS2) & nchar(N4)<3,paste0(N2,N3,N4),word2)) %>%
-                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-接尾-接尾",POS2) & 
+                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-接尾-接尾",POS2) & 
                                         !grepl("^[[:alnum:]*]+-記号-接尾-接尾",POS2),paste0(N2,N3,N4),word2)) %>%
-                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-数-数-接尾",POS2) & nchar(N4)<3,paste0(N2,N3,N4),word2)) %>%
-                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-数-数-数",POS2),paste0(N2,N3,N4),word2)) %>%
-                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-数-記号-数",POS2),paste0(N2,N3,N4),word2)) %>%
+                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+",POS1) & grepl("^[[:alnum:]*]+-数-数-接尾",POS2) & nchar(N4)<3,paste0(N2,N3,N4),word2)) %>%
+                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+",POS1) & grepl("^[[:alnum:]*]+-数-数-数",POS2),paste0(N2,N3,N4),word2)) %>%
+                mutate(word2=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+",POS1) & grepl("^[[:alnum:]*]+-数-記号-数",POS2),paste0(N2,N3,N4),word2)) %>%
                 
-                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-接頭詞-[:alnum:]*-",POS1) & !grepl("<U",N4),paste0(N3,N4),N3)) %>%
-                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-接尾-",POS2) & 
+                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-接頭詞-[[:alnum:]*]+-",POS1) & !grepl("<U",N4),paste0(N3,N4),N3)) %>%
+                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-接尾-",POS2) & 
                                         !grepl("^[[:alnum:]*]+-[[:alnum:]*]+-記号-接尾-",POS2) & nchar(N4)<3,paste0(N3,N4),word3)) %>%
-                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-接頭詞-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-接尾",POS2) & 
+                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-接頭詞-[[:alnum:]*]+-[[:alnum:]*]+",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-接尾",POS2) & 
                                         !grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+記号-接尾",POS2) & nchar(N5)<3,paste0(N3,N4,N5),word3)) %>%
-                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-接尾-接尾",POS2) & 
+                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-接尾-接尾",POS2) & 
                                         !grepl("^[[:alnum:]*]+-[[:alnum:]*]+-記号-接尾-接尾",POS2),paste0(N3,N4,N5),word3)) %>%
-                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-数-数-接尾",POS2) & nchar(N5)<3,paste0(N3,N4,N5),word3)) %>%
-                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-数-数-数",POS2),paste0(N3,N4,N5),word3)) %>%
-                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-数-記号-数",POS2),paste0(N3,N4,N5),word3)) %>%
+                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-数-数-接尾",POS2) & nchar(N5)<3,paste0(N3,N4,N5),word3)) %>%
+                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-数-数-数",POS2),paste0(N3,N4,N5),word3)) %>%
+                mutate(word3=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-数-記号-数",POS2),paste0(N3,N4,N5),word3)) %>%
                 
-                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-接頭詞-[:alnum:]*-",POS1) & !grepl("<U",N5),paste0(N4,N5),N4)) %>%
-                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-接尾-",POS2) & 
+                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-接頭詞-[[:alnum:]*]+-",POS1) & !grepl("<U",N5),paste0(N4,N5),N4)) %>%
+                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-接尾-",POS2) & 
                                         !grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-記号-接尾-",POS2) & nchar(N5)<3,paste0(N4,N5),word4)) %>%
-                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-接頭詞-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-接尾",POS2) & 
+                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-接頭詞-[[:alnum:]*]+-[[:alnum:]*]+",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-接尾",POS2) & 
                                         !grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-記号-接尾",POS2) & nchar(N6)<3,paste0(N4,N5,N6),word4)) %>%
-                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-接尾-接尾",POS2) & 
+                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-接尾-接尾",POS2) & 
                                         !grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-記号-接尾-接尾",POS2),paste0(N4,N5,N6),word4)) %>%
-                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-数-数-接尾",POS2) & nchar(N6)<3,paste0(N4,N5,N6),word4)) %>%
-                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-数-数-数",POS2),paste0(N4,N5,N6),word4)) %>%
-                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[:alnum:]*-[:alnum:]*-[:alnum:]*",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-数-記号-数",POS2),paste0(N4,N5,N6),word4)) %>%
+                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-数-数-接尾",POS2) & nchar(N6)<3,paste0(N4,N5,N6),word4)) %>%
+                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-数-数-数",POS2),paste0(N4,N5,N6),word4)) %>%
+                mutate(word4=ifelse(grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+",POS1) & grepl("^[[:alnum:]*]+-[[:alnum:]*]+-[[:alnum:]*]+-数-記号-数",POS2),paste0(N4,N5,N6),word4)) %>%
                 group_by(N1,N2,N3,N4,N5,N6,status_id) %>%
                 mutate(word2=ifelse(!grepl(word2,word1),word2,ifelse(!grepl(word3,word1),word3,word4))) %>%
                 ungroup() %>%
@@ -524,7 +534,7 @@ server <- function(input, output) {
                 # filter(rate1>=0.5|rate2>=0.5) %>%
                 # filter(!(Ranks==max(Ranks)&rate1<0.1)) %>%
                 mutate(num=1:n()) %>%
-                filter(num<=100)
+                filter(num<=100|Ranks<=rk/2)
             
             TFSS <-
                 TFS %>%
