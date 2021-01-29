@@ -158,7 +158,7 @@ server <- function(input, output) {
             td %>%
             mutate(JTime=as.POSIXct(format(created_at, tz="Japan"))) %>%
             mutate(Tweet=gsub("　","",text)) %>%
-            mutate(Tweet=stri_trans_nfkc(Tweet)) %>%
+            # mutate(Tweet=stri_trans_nfkc(Tweet)) %>%
             # mutate(Tweet=gsub("\"","",Tweet)) %>%
             mutate(Tweet=gsub("http[[:print:]]{,18}","",Tweet)) %>%
             mutate(Tweet=gsub("@[[:alnum:][:punct:]]+","",Tweet)) %>%
@@ -189,7 +189,7 @@ server <- function(input, output) {
         # te <-
         #     tds%>%
         #     distinct(status_id,text,Tweet)
-        
+
         # print(length(dc))
         # print(nrow(tds %>% filter(!status_id %in% dc)))
         
@@ -341,6 +341,8 @@ server <- function(input, output) {
             
             write.csv(TDS,"TDS.csv",row.names = F,fileEncoding = "CP932")
             TDS <- fread("TDS.csv")
+            
+            
             
             # for (i in 1:nrow(TDS)) {
             #   for (n in 1:nrow(Emoji)) {
