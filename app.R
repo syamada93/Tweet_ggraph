@@ -125,6 +125,7 @@ server <- function(input, output) {
     wd="雨 コロナ"
     wd="大雨"
     wd="神奈川　コロナ"
+    wd="感染者数"
     
     WD <- eventReactive(input$button1,{
         input$wd
@@ -158,7 +159,7 @@ server <- function(input, output) {
             td %>%
             mutate(JTime=as.POSIXct(format(created_at, tz="Japan"))) %>%
             mutate(Tweet=gsub("　","",text)) %>%
-            # mutate(Tweet=stri_trans_nfkc(Tweet)) %>%
+            mutate(Tweet=stri_trans_nfkc(Tweet)) %>%
             # mutate(Tweet=gsub("\"","",Tweet)) %>%
             mutate(Tweet=gsub("http[[:print:]]{,18}","",Tweet)) %>%
             mutate(Tweet=gsub("@[[:alnum:][:punct:]]+","",Tweet)) %>%
@@ -216,7 +217,9 @@ server <- function(input, output) {
             mutate(total=sum(n)) %>%
             ungroup() %>%
             mutate(JTime=as.POSIXct(paste(Year,Month,Day,Hour,Minute),format="%Y %m %d %H %M")) %>%
-            filter(floor(as.numeric(JTime)/60)<floor(as.numeric(Sys.time())/60))
+            filter(floor(as.numeric(JTime)/60)<floor(as.numeric(Sys.time())/60)) %>%
+            mutate(cm=cumsum(n)) %>%
+            filter(cm>0)
         
         
         print(head(TDC %>% arrange(desc(JTime))))
@@ -332,7 +335,7 @@ server <- function(input, output) {
             
             TDS <- 
                 fread(paste0("Tweet_data/Tweet_",wd,"_",day,"_",mid,".csv")) %>%
-                # filter(!is_retweet) %>%
+                filter(!is_retweet) %>%
                 mutate(ID=paste0("Row",1:n())) %>%
                 # mutate(Tweet2=Tweet)
                 mutate(Tweet=gsub("<"," <",Tweet)) %>%
