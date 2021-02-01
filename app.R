@@ -219,7 +219,8 @@ server <- function(input, output) {
             mutate(JTime=as.POSIXct(paste(Year,Month,Day,Hour,Minute),format="%Y %m %d %H %M")) %>%
             filter(floor(as.numeric(JTime)/60)<floor(as.numeric(Sys.time())/60)) %>%
             mutate(cm=cumsum(n)) %>%
-            filter(cm>0)
+            filter(cm>0) %>%
+            select(-cm)
         
         
         print(head(TDC %>% arrange(desc(JTime))))
