@@ -282,7 +282,10 @@ server <- function(input, output) {
                 mutate(total=sum(n)) %>%
                 ungroup() %>%
                 mutate(JTime=as.POSIXct(paste(Year,Month,Day,Hour,M),format="%Y %m %d %H %M")) %>%
-                filter(JTime<Sys.time())
+                filter(JTime<Sys.time()) %>%
+                mutate(cm=cumsum(n)) %>%
+                filter(cm>0) %>%
+                select(-cm)
             
             Comp <- 
                 data.frame(JTime=rep(seq(min(TDCH$JTime),max(TDCH$JTime),60*10),each=2),
@@ -346,8 +349,6 @@ server <- function(input, output) {
             write.csv(TDS,"TDS.csv",row.names = F,fileEncoding = "CP932")
             TDS <- fread("TDS.csv")
             
-            
-            
             # for (i in 1:nrow(TDS)) {
             #   for (n in 1:nrow(Emoji)) {
             #     if(grepl(Emoji$Uni[n],TDS$Tweet[i])){
@@ -365,7 +366,7 @@ server <- function(input, output) {
             TF0 <- docDF(TDS, col = 100, type = 1, N = 1, minFreq = 1, nDF = 1, dic = "Tweet_data/user.dic",
                          pos = c("感動詞","形容詞","動詞","副詞","名詞","接頭詞","連体詞"))
             
-            # TF <- docDF(TDS[46,], col = 100, type = 1, N = 10, minFreq = 1, nDF = 1, dic = "Tweet_data/user.dic")
+            # TF <- docDF(TDS[84,], col = 100, type = 1, N = 10, minFreq = 1, nDF = 1, dic = "Tweet_data/user.dic")
             
             TF0S <-
                 TF0 %>%
@@ -638,141 +639,141 @@ server <- function(input, output) {
             
         })
         
-        output$Dline0 <-  renderPlot({
-            TDCH <-
-                TDC %>%
-                mutate(M=floor(Minute/10)*10) %>%
-                group_by(Year,Month,Day,Hour,M,RT) %>%
-                summarise(n=sum(n)) %>%
-                ungroup() %>%
-                complete(Year,Month,Day,Hour,M,RT,fill=list(n=0)) %>%
-                group_by(Year,Month,Day,Hour,M) %>%
-                mutate(total=sum(n)) %>%
-                ungroup() %>%
-                mutate(JTime=as.POSIXct(paste(Year,Month,Day,Hour,M),format="%Y %m %d %H %M")) %>%
-                filter(JTime<Sys.time())
-            
-            Comp <- 
-                data.frame(JTime=rep(seq(max(TDCH$JTime)-24*60*60,max(TDCH$JTime),60*10),each=2),
-                           RT=rep(c(F,T),24*6+1))
-            TDC2 <-
-                Comp %>%
-                left_join(TDCH) %>%
-                mutate(n=ifelse(is.na(n),0,n)) %>%
-                mutate(total=ifelse(is.na(total),0,total))
-            
-            keta <-nchar(max(TDC2$total))-1
-            if(floor(max(TDC2$total)/(10^keta))<2)
-                keta <- keta-1
-            
-            p <-
-                TDC2 %>%
-                # filter(total>0) %>%
-                mutate(RTs=factor(RT,labels = c("オリジナルツイート","リツイート"))) %>%
-                ggplot(aes(x=JTime,y=n,fill=reorder(RTs,-RT))) +
-                geom_area(col="black") +
-                # geom_text(data=TDC2,aes(y=total+10,label=format(JTime,"%H"),fill=NULL),col="red") +
-                labs(x="",y="",fill="") +
-                scale_x_datetime(date_breaks="1 hours",date_labels = "%H時") +
-                scale_y_continuous(breaks = seq(0,10000000,10^keta),limits = c(0,max(TDC2$total)+10^(keta-1))) +
-                ggtitle(paste0(min(TDC2$JTime),"～",max(TDC2$JTime))) +
-                theme(legend.position = "bottom") +
-                theme(text = element_text(size=30)) +
-                theme(axis.title.x = element_blank())
-            
-            plot(p)
-        })
-        
-        output$Dline <-  renderPlot({
-            TDCH <-
-                TDC %>%
-                group_by(Year,Month,Day,Hour,RT) %>%
-                summarise(n=sum(n)) %>%
-                ungroup() %>%
-                complete(Year,Month,Day,Hour,RT,fill=list(n=0)) %>%
-                group_by(Year,Month,Day,Hour) %>%
-                mutate(total=sum(n)) %>%
-                ungroup() %>%
-                mutate(JTime=as.POSIXct(paste(Year,Month,Day,Hour),format="%Y %m %d %H")) %>%
-                filter(JTime<Sys.time())
-            
-            Comp <- 
-                data.frame(JTime=rep(seq(max(TDCH$JTime)-24*60*60,max(TDCH$JTime),60*60),each=2),
-                           RT=rep(c(F,T),24+1))
-            TDC2 <-
-                Comp %>%
-                left_join(TDCH) %>%
-                mutate(n=ifelse(is.na(n),0,n)) %>%
-                mutate(total=ifelse(is.na(total),0,total))
-            
-            keta <-nchar(max(TDC2$total))-1
-            if(floor(max(TDC2$total)/(10^keta))<2)
-                keta <- keta-1
-            
-            p <-
-                TDC2 %>%
-                # filter(total>0) %>%
-                mutate(RTs=factor(RT,labels = c("オリジナルツイート","リツイート"))) %>%
-                ggplot(aes(x=JTime,y=n,fill=reorder(RTs,-RT))) +
-                geom_area(col="black") +
-                # geom_text(data=TDC2,aes(y=total+10,label=format(JTime,"%H"),fill=NULL),col="red") +
-                labs(x="",y="",fill="") +
-                scale_x_datetime(date_breaks="1 hours",date_labels = "%H時",
-                                 date_minor_break="1 hours") +
-                scale_y_continuous(breaks = seq(0,10000000,10^keta),limits = c(0,max(TDC2$total)+10^(keta-1))) +
-                ggtitle(paste0(min(TDC2$JTime),"～",max(TDC2$JTime))) +
-                theme(legend.position = "bottom") +
-                theme(text = element_text(size=30)) +
-                # theme(axis.text.x =  element_text(size=30)) +
-                # theme(axis.text.x =  element_text(size=20,angle = 90,vjust = 0.5)) +
-                theme(axis.title.x = element_blank())
-            
-            plot(p)
-        })
-        
-        output$Mline <-  renderPlot({
-            TDCM <-
-                TDC %>%
-                group_by(Year,Month,Day,RT) %>%
-                summarise(n=sum(n)) %>%
-                ungroup() %>%
-                complete(Year,Month,Day,RT,fill=list(n=0)) %>%
-                group_by(Year,Month,Day) %>%
-                mutate(total=sum(n)) %>%
-                ungroup() %>%
-                mutate(JTime=as.POSIXct(paste(Year,Month,Day),format="%Y %m %d")) %>%
-                filter(JTime<Sys.time())
-            
-            Comp <- 
-                data.frame(JTime=rep(seq(max(TDCM$JTime)-31*24*60*60,max(TDCM$JTime),24*60*60),each=2),
-                           RT=rep(c(F,T),32))
-            TDC2 <-
-                Comp %>%
-                left_join(TDCM) %>%
-                mutate(n=ifelse(is.na(n),0,n)) %>%
-                mutate(total=ifelse(is.na(total),0,total))
-            
-            keta <-nchar(max(TDC2$total))-1
-            if(floor(max(TDC2$total)/(10^keta))<2)
-                keta <- keta-1
-            
-            p <-
-                TDC2 %>%
-                # filter(total>0) %>%
-                mutate(RTs=factor(RT,labels = c("オリジナルツイート","リツイート"))) %>%
-                ggplot(aes(x=JTime,y=n,fill=reorder(RTs,-RT))) +
-                geom_area(col="black") +
-                # geom_text(data=TDC2,aes(y=total+10,label=format(JTime,"%H"),fill=NULL),col="red") +
-                labs(x="",y="",fill="") +
-                scale_x_datetime(date_breaks="1 days",date_labels = "%d日") +
-                scale_y_continuous(breaks = seq(0,10000000,10^keta),limits = c(0,max(TDC2$total)+10^(keta-1))) +
-                ggtitle(paste0(min(TDC2$JTime),"～",max(TDC2$JTime))) +
-                theme(legend.position = "bottom") +
-                theme(text = element_text(size=30)) +
-                theme(axis.title.x = element_blank())
-            
-            plot(p)
-        })
+        # output$Dline0 <-  renderPlot({
+        #     TDCH <-
+        #         TDC %>%
+        #         mutate(M=floor(Minute/10)*10) %>%
+        #         group_by(Year,Month,Day,Hour,M,RT) %>%
+        #         summarise(n=sum(n)) %>%
+        #         ungroup() %>%
+        #         complete(Year,Month,Day,Hour,M,RT,fill=list(n=0)) %>%
+        #         group_by(Year,Month,Day,Hour,M) %>%
+        #         mutate(total=sum(n)) %>%
+        #         ungroup() %>%
+        #         mutate(JTime=as.POSIXct(paste(Year,Month,Day,Hour,M),format="%Y %m %d %H %M")) %>%
+        #         filter(JTime<Sys.time())
+        #     
+        #     Comp <- 
+        #         data.frame(JTime=rep(seq(max(TDCH$JTime)-24*60*60,max(TDCH$JTime),60*10),each=2),
+        #                    RT=rep(c(F,T),24*6+1))
+        #     TDC2 <-
+        #         Comp %>%
+        #         left_join(TDCH) %>%
+        #         mutate(n=ifelse(is.na(n),0,n)) %>%
+        #         mutate(total=ifelse(is.na(total),0,total))
+        #     
+        #     keta <-nchar(max(TDC2$total))-1
+        #     if(floor(max(TDC2$total)/(10^keta))<2)
+        #         keta <- keta-1
+        #     
+        #     p <-
+        #         TDC2 %>%
+        #         # filter(total>0) %>%
+        #         mutate(RTs=factor(RT,labels = c("オリジナルツイート","リツイート"))) %>%
+        #         ggplot(aes(x=JTime,y=n,fill=reorder(RTs,-RT))) +
+        #         geom_area(col="black") +
+        #         # geom_text(data=TDC2,aes(y=total+10,label=format(JTime,"%H"),fill=NULL),col="red") +
+        #         labs(x="",y="",fill="") +
+        #         scale_x_datetime(date_breaks="1 hours",date_labels = "%H時") +
+        #         scale_y_continuous(breaks = seq(0,10000000,10^keta),limits = c(0,max(TDC2$total)+10^(keta-1))) +
+        #         ggtitle(paste0(min(TDC2$JTime),"～",max(TDC2$JTime))) +
+        #         theme(legend.position = "bottom") +
+        #         theme(text = element_text(size=30)) +
+        #         theme(axis.title.x = element_blank())
+        #     
+        #     plot(p)
+        # })
+        # 
+        # output$Dline <-  renderPlot({
+        #     TDCH <-
+        #         TDC %>%
+        #         group_by(Year,Month,Day,Hour,RT) %>%
+        #         summarise(n=sum(n)) %>%
+        #         ungroup() %>%
+        #         complete(Year,Month,Day,Hour,RT,fill=list(n=0)) %>%
+        #         group_by(Year,Month,Day,Hour) %>%
+        #         mutate(total=sum(n)) %>%
+        #         ungroup() %>%
+        #         mutate(JTime=as.POSIXct(paste(Year,Month,Day,Hour),format="%Y %m %d %H")) %>%
+        #         filter(JTime<Sys.time())
+        #     
+        #     Comp <- 
+        #         data.frame(JTime=rep(seq(max(TDCH$JTime)-24*60*60,max(TDCH$JTime),60*60),each=2),
+        #                    RT=rep(c(F,T),24+1))
+        #     TDC2 <-
+        #         Comp %>%
+        #         left_join(TDCH) %>%
+        #         mutate(n=ifelse(is.na(n),0,n)) %>%
+        #         mutate(total=ifelse(is.na(total),0,total))
+        #     
+        #     keta <-nchar(max(TDC2$total))-1
+        #     if(floor(max(TDC2$total)/(10^keta))<2)
+        #         keta <- keta-1
+        #     
+        #     p <-
+        #         TDC2 %>%
+        #         # filter(total>0) %>%
+        #         mutate(RTs=factor(RT,labels = c("オリジナルツイート","リツイート"))) %>%
+        #         ggplot(aes(x=JTime,y=n,fill=reorder(RTs,-RT))) +
+        #         geom_area(col="black") +
+        #         # geom_text(data=TDC2,aes(y=total+10,label=format(JTime,"%H"),fill=NULL),col="red") +
+        #         labs(x="",y="",fill="") +
+        #         scale_x_datetime(date_breaks="1 hours",date_labels = "%H時",
+        #                          date_minor_break="1 hours") +
+        #         scale_y_continuous(breaks = seq(0,10000000,10^keta),limits = c(0,max(TDC2$total)+10^(keta-1))) +
+        #         ggtitle(paste0(min(TDC2$JTime),"～",max(TDC2$JTime))) +
+        #         theme(legend.position = "bottom") +
+        #         theme(text = element_text(size=30)) +
+        #         # theme(axis.text.x =  element_text(size=30)) +
+        #         # theme(axis.text.x =  element_text(size=20,angle = 90,vjust = 0.5)) +
+        #         theme(axis.title.x = element_blank())
+        #     
+        #     plot(p)
+        # })
+        # 
+        # output$Mline <-  renderPlot({
+        #     TDCM <-
+        #         TDC %>%
+        #         group_by(Year,Month,Day,RT) %>%
+        #         summarise(n=sum(n)) %>%
+        #         ungroup() %>%
+        #         complete(Year,Month,Day,RT,fill=list(n=0)) %>%
+        #         group_by(Year,Month,Day) %>%
+        #         mutate(total=sum(n)) %>%
+        #         ungroup() %>%
+        #         mutate(JTime=as.POSIXct(paste(Year,Month,Day),format="%Y %m %d")) %>%
+        #         filter(JTime<Sys.time())
+        #     
+        #     Comp <- 
+        #         data.frame(JTime=rep(seq(max(TDCM$JTime)-31*24*60*60,max(TDCM$JTime),24*60*60),each=2),
+        #                    RT=rep(c(F,T),32))
+        #     TDC2 <-
+        #         Comp %>%
+        #         left_join(TDCM) %>%
+        #         mutate(n=ifelse(is.na(n),0,n)) %>%
+        #         mutate(total=ifelse(is.na(total),0,total))
+        #     
+        #     keta <-nchar(max(TDC2$total))-1
+        #     if(floor(max(TDC2$total)/(10^keta))<2)
+        #         keta <- keta-1
+        #     
+        #     p <-
+        #         TDC2 %>%
+        #         # filter(total>0) %>%
+        #         mutate(RTs=factor(RT,labels = c("オリジナルツイート","リツイート"))) %>%
+        #         ggplot(aes(x=JTime,y=n,fill=reorder(RTs,-RT))) +
+        #         geom_area(col="black") +
+        #         # geom_text(data=TDC2,aes(y=total+10,label=format(JTime,"%H"),fill=NULL),col="red") +
+        #         labs(x="",y="",fill="") +
+        #         scale_x_datetime(date_breaks="1 days",date_labels = "%d日") +
+        #         scale_y_continuous(breaks = seq(0,10000000,10^keta),limits = c(0,max(TDC2$total)+10^(keta-1))) +
+        #         ggtitle(paste0(min(TDC2$JTime),"～",max(TDC2$JTime))) +
+        #         theme(legend.position = "bottom") +
+        #         theme(text = element_text(size=30)) +
+        #         theme(axis.title.x = element_blank())
+        #     
+        #     plot(p)
+        # })
     })
 }
 
