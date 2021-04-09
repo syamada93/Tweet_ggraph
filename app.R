@@ -41,22 +41,6 @@ if(!require(rtweet))
     install.packages("rtweet")
 library(rtweet)
 
-if(!require(leaflet))
-    install.packages("leaflet")
-library(leaflet)
-
-if(!require(leafletCN))
-    install.packages("leafletCN")
-library(leafletCN)
-
-if(!require(maptools))
-    install.packages("maptools")
-library(maptools)
-
-if(!require(sf))
-    install.packages("sf")
-library(sf)
-
 if(!require(rsconnect))
     install.packages("rsconnect")
 library(rsconnect)
